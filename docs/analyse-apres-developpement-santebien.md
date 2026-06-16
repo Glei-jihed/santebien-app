@@ -4,14 +4,43 @@ Date : 16 juin 2026
 Projet : application web communautaire de santé, inspirée de Stack Overflow  
 Stack : FastAPI, SQLAlchemy async, PostgreSQL, Redis/mémoire, Docker, Fly.io, Render PostgreSQL
 
-## Objectif
+## Objectif d'optimisation
 
-Cette analyse mesure le résultat obtenu après développement : précision fonctionnelle, pertes techniques, performance, cache, CPU et impact CO₂.
+Cette analyse mesure le résultat obtenu après développement avec un objectif principal : identifier les optimisations réalisées, mesurer leurs gains et préciser les pertes restantes.
+
+L'optimisation prioritaire de cette itération est la réduction du coût des lectures répétées grâce au cache. Dans SanteBien, les pages les plus consultées sont les questions, les réponses et les articles. Sans optimisation, chaque lecture peut solliciter la base de données. Avec cache, une lecture déjà calculée est servie directement, ce qui réduit la latence, le CPU, les entrées/sorties et donc l'impact CO₂ estimé.
 
 SanteBien n'est pas un modèle d'IA prédictif. Il n'y a donc pas de `loss`, `accuracy`, `precision` ou `recall` au sens machine learning. Ici :
 
 - la précision signifie : conformité fonctionnelle avec le besoin demandé ;
 - la perte signifie : coût résiduel en latence, cache miss, CPU, énergie et CO₂.
+
+## Optimisations appliquées
+
+| Optimisation | Objectif | Effet attendu |
+|---|---|---|
+| Cache sur la liste des questions | Éviter de recalculer les listes consultées souvent | Moins de requêtes base |
+| Cache sur le détail d'une question | Accélérer les lectures répétées | Latence et CO₂ réduits |
+| Cache sur articles santé | Réduire le coût des contenus pédagogiques souvent lus | Moins d'I/O |
+| Invalidation ciblée du cache | Garder les données cohérentes après commentaire/vote/article | Éviter les données obsolètes |
+| Validation Pydantic | Rejeter tôt les entrées invalides | Moins de traitement inutile |
+| Pagination/limite de résultats | Éviter de charger trop de données | Moins de mémoire et CPU |
+| Docker slim | Réduire l'image et faciliter le déploiement | Déploiement plus sobre |
+| PostgreSQL externe | Éviter SQLite volatile en prod | Données persistantes |
+
+## Mesure avant/après optimisation cache
+
+Le scénario suivant compare 100 lectures froides, où le cache est invalidé avant chaque requête, avec 100 lectures chaudes, où la réponse est servie depuis le cache.
+
+| Indicateur | Sans bénéfice cache | Avec cache optimisé | Gain |
+|---|---:|---:|---:|
+| Latence moyenne | 2,7821 ms | 0,2143 ms | -92,30 % |
+| Latence P95 | 3,159 ms | 0,301 ms | -90,47 % |
+| Latence maximale | 18,893 ms | 0,431 ms | -97,72 % |
+| CO₂ estimé pour 100 lectures | 1,40647e-07 kg | 1,08370e-08 kg | -92,29 % |
+| Cache hit rate | 0 % | 100 % | +100 points |
+
+Conclusion : l'optimisation cache est le gain principal de cette itération. Elle divise environ par 13 le coût moyen d'une lecture répétée.
 
 ## Résultat fonctionnel
 
@@ -69,7 +98,7 @@ Campagne locale : 100 lectures répétées d'une question avec cache actif.
 | CO₂ par requête | 0,000000000796 kg CO₂eq |
 | Équivalent voiture | environ 0,398 mm |
 
-## Analyse de la perte
+## Analyse des pertes restantes après optimisation
 
 ### Perte cache
 
@@ -78,9 +107,9 @@ Campagne locale : 100 lectures répétées d'une question avec cache actif.
 | Cache hit rate | 98,02 % |
 | Cache miss rate | 1,98 % |
 
-La perte cache est faible : seulement 1,98 % des lectures ne sont pas servies depuis le cache.
+La perte cache est faible : seulement 1,98 % des lectures de la campagne globale ne sont pas servies depuis le cache. Dans le scénario optimisé pur, le cache atteint 100 % de hits après préchauffage.
 
-### Perte performance
+### Perte performance restante
 
 Comparaison avec la précédente mesure de Phase 2 :
 
@@ -90,7 +119,9 @@ Comparaison avec la précédente mesure de Phase 2 :
 | P95 | 0,282 ms | 0,331 ms | +17,38 % |
 | CO₂ campagne | 6,72e-08 kg | 7,96e-08 kg | +18,41 % |
 
-Interprétation : la perte relative existe, mais la valeur absolue reste très faible. L'augmentation vient surtout de la variabilité locale et des couches ajoutées pour préparer la production : configuration PostgreSQL externe, SSL Render, admin initial et tests supplémentaires.
+Interprétation : cette table compare deux états après développement, pas le scénario avant/après cache. La perte relative existe, mais la valeur absolue reste très faible. L'augmentation vient surtout de la variabilité locale et des couches ajoutées pour préparer la production : configuration PostgreSQL externe, SSL Render, admin initial et tests supplémentaires.
+
+La vraie optimisation mesurée est celle du cache : -92,30 % de latence moyenne entre lecture froide et lecture chaude.
 
 ### Perte énergétique
 
@@ -131,6 +162,9 @@ Justification :
 
 - 98,02 % de cache hit ;
 - seulement 1,98 % de perte cache ;
+- -92,30 % de latence moyenne sur les lectures chaudes ;
+- -90,47 % de P95 ;
+- -92,29 % de CO₂ estimé sur le scénario optimisé ;
 - P95 de 0,331 ms ;
 - empreinte CO₂ très faible sur le scénario mesuré.
 
@@ -146,9 +180,22 @@ Risque : faible, car l'invalidation existe déjà après création, commentaire,
 - Render Free expire le 16 juillet 2026.
 - L'application ne produit pas de diagnostic médical automatique.
 
+## Prochaines optimisations recommandées
+
+| Priorité | Optimisation | Impact attendu | Effort |
+|---|---|---|---|
+| 1 | Activer Redis externe en production | Cache partagé entre machines | Moyen |
+| 2 | Mesurer la latence Fly.io vers Render PostgreSQL | Identifier la perte réseau réelle | Faible |
+| 3 | Ajouter des index PostgreSQL sur tags, dates et auteurs | Accélérer recherche/tri | Moyen |
+| 4 | Compresser les assets front | Réduire transfert réseau | Faible |
+| 5 | Ajouter pagination stricte côté API | Réduire mémoire et I/O | Faible |
+| 6 | Journaliser les endpoints les plus coûteux | Optimisation pilotée par données | Moyen |
+
+Décision : ne pas optimiser prématurément les fonctions métier tant que le profiling montre que les hotspots principaux viennent surtout du framework et du banc de test.
+
 ## Conclusion
 
-Après développement, SanteBien est fonctionnel, testable et déployable.
+Après développement, SanteBien est fonctionnel, testable, déployable et déjà optimisé sur son parcours de lecture principal.
 
 La précision fonctionnelle est forte sur le périmètre demandé : 6 tests sur 6 réussissent.
 
@@ -158,5 +205,11 @@ La perte mesurée est faible :
 - P95 de 0,331 ms ;
 - 7,96e-08 kg CO₂eq pour 100 lectures ;
 - environ 0,398 mm en équivalent voiture.
+
+Le gain d'optimisation principal est net :
+
+- -92,30 % de latence moyenne grâce au cache ;
+- -90,47 % sur le P95 ;
+- -92,29 % de CO₂ estimé sur 100 lectures répétées.
 
 La prochaine analyse devra être faite après déploiement réel, pour mesurer la latence entre Fly.io et Render PostgreSQL et décider si Redis externe ou une base plus proche de l'application est nécessaire.
