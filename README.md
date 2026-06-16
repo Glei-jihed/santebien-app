@@ -59,6 +59,7 @@ Le pipeline GitHub Actions applique les pratiques du cours DevOps Vert :
 - mesure FP32/INT8 du mini-modele IA ;
 - green gates modele sur compression, accuracy, accord, taille, latence et CO2 ;
 - mesure API/cache gardee comme contexte d'eco-conception ;
+- monitoring frugal via `/metrics` et `/api/monitoring/summary` ;
 - build Docker et controle de taille d'image.
 
 Commandes locales equivalentes :
@@ -67,6 +68,7 @@ Commandes locales equivalentes :
 .venv/bin/python -m scripts.measure_phase2
 .venv/bin/python -m scripts.compare_cache_optimization
 .venv/bin/python -m scripts.measure_ai_model
+.venv/bin/python -m scripts.check_monitoring
 .venv/bin/python -m scripts.green_gates
 ```
 
@@ -103,3 +105,7 @@ Documentation API : `http://localhost:8000/docs`
 Mesures cache : `http://localhost:8000/api/metrics/cache`
 
 Analyse IA non diagnostique : `POST /api/ai/analyze-question`
+
+Monitoring Prometheus : `http://localhost:8000/metrics`
+
+Résumé monitoring JSON : `http://localhost:8000/api/monitoring/summary`

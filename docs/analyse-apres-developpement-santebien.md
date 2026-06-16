@@ -108,6 +108,7 @@ Workflow : `.github/workflows/green-ci.yml`
 - scan sécurité Bandit ;
 - tests automatisés ;
 - mesure modèle FP32/INT8 ;
+- vérification monitoring ;
 - mesure API en contexte ;
 - green gates modèle ;
 - build Docker ;
@@ -115,7 +116,25 @@ Workflow : `.github/workflows/green-ci.yml`
 
 Décision importante : la CI est maintenant centrée sur le modèle. Les mesures API/cache restent utiles, mais elles ne sont plus le cœur de l'analyse du cours.
 
-## 8. Contexte API secondaire
+## 8. Monitoring frugal
+
+| Endpoint | Utilité |
+|---|---|
+| `/metrics` | Métriques Prometheus |
+| `/api/monitoring/summary` | Résumé JSON |
+
+Métriques exposées :
+
+- `santebien_requests_total` ;
+- `santebien_request_latency_average_ms` ;
+- `santebien_request_latency_max_ms` ;
+- `santebien_co2_total_kg` ;
+- `santebien_model_size_bytes` ;
+- `santebien_model_size_reduction_percent`.
+
+Le script `scripts.check_monitoring` vérifie que ces métriques existent et que la réduction de taille du modèle reste au-dessus du seuil vert.
+
+## 9. Contexte API secondaire
 
 | Indicateur API | Résultat |
 |---|---:|
@@ -126,7 +145,7 @@ Décision importante : la CI est maintenant centrée sur le modèle. Les mesures
 
 Interprétation : l'application autour du modèle reste légère et cohérente avec l'éco-conception.
 
-## 9. Résultat fonctionnel
+## 10. Résultat fonctionnel
 
 | Élément | État |
 |---|---:|
@@ -137,9 +156,10 @@ Interprétation : l'application autour du modèle reste légère et cohérente a
 | Articles médecins | OK |
 | Endpoint IA | OK |
 | Bouton IA dans le front | OK |
+| Monitoring Prometheus | OK |
 | Tests automatisés | 7/7 |
 
-## 10. Conclusion
+## 11. Conclusion
 
 Le livrable répond à l'objectif du cours :
 
@@ -149,6 +169,7 @@ Le livrable répond à l'objectif du cours :
 - perte de qualité vérifiée ;
 - CO₂ estimé ;
 - green gates automatisées ;
+- monitoring frugal ajouté ;
 - CI/CD vert configuré.
 
 Résultat final :

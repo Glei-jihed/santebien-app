@@ -106,10 +106,30 @@ Ce que je peux dire :
 - tests automatisés ;
 - scan sécurité Bandit ;
 - mesure modèle avec `scripts.measure_ai_model` ;
+- vérification monitoring avec `scripts.check_monitoring` ;
 - green gates avec `scripts.green_gates` ;
 - build Docker et contrôle de taille d'image.
 
-## 8. Contexte API secondaire
+## 8. Monitoring frugal
+
+Ce que je peux dire :
+
+> Nous avons ajouté un monitoring léger, sans installer une stack lourde. L'application expose `/metrics` au format Prometheus et `/api/monitoring/summary` en JSON.
+
+Métriques suivies :
+
+- nombre de requêtes ;
+- latence moyenne et maximale ;
+- CO₂ estimé cumulé ;
+- taille du modèle FP32 ;
+- taille du modèle INT8 ;
+- réduction de taille INT8.
+
+Phrase simple :
+
+> Le monitoring reste frugal : peu de métriques, faible cardinalité, et une vérification automatique dans la CI.
+
+## 9. Contexte API secondaire
 
 Le cache API reste utile, mais ce n'est plus l'analyse principale.
 
@@ -124,17 +144,17 @@ Phrase à dire :
 
 > L'API est aussi légère, mais le livrable principal du cours est maintenant bien centré sur le modèle.
 
-## 9. Conclusion orale
+## 10. Conclusion orale
 
 Version courte :
 
-> Nous avons appliqué la démarche IA frugale sur un modèle réel de SanteBien. Nous avons mesuré le modèle FP32, puis nous l'avons quantifié en INT8. La taille passe de 600 bytes à 154 bytes, soit -74,33 %. L'accuracy reste à 100 % sur l'échantillon et l'accord FP32/INT8 est de 100 %, donc nous n'observons pas de perte de qualité. La latence INT8 est légèrement plus haute en Python, mais reste très faible et sous le seuil de 0,1 ms. Enfin, la CI/CD verte bloque toute régression avec des green gates centrées sur le modèle.
+> Nous avons appliqué la démarche IA frugale sur un modèle réel de SanteBien. Nous avons mesuré le modèle FP32, puis nous l'avons quantifié en INT8. La taille passe de 600 bytes à 154 bytes, soit -74,33 %. L'accuracy reste à 100 % sur l'échantillon et l'accord FP32/INT8 est de 100 %, donc nous n'observons pas de perte de qualité. La latence INT8 est légèrement plus haute en Python, mais reste très faible et sous le seuil de 0,1 ms. Enfin, la CI/CD verte bloque toute régression avec des green gates centrées sur le modèle, et le monitoring Prometheus permet de surveiller l'application après lancement.
 
 Version très courte :
 
 > Notre optimisation principale est la quantification INT8 du modèle : -74,33 % de taille, 100 % d'accord FP32/INT8, et des green gates automatisées.
 
-## 10. Questions possibles
+## 11. Questions possibles
 
 ### Est-ce que le modèle donne un diagnostic ?
 

@@ -541,6 +541,31 @@
 
         <article class="slide">
           <div class="slide-header">
+            <span class="eyebrow">Monitoring</span>
+            <span class="eyebrow">DevOps Vert</span>
+          </div>
+          <h1>Surveiller sans usine à gaz</h1>
+          <div class="grid-3" style="margin-top: 34px">
+            <div class="card">
+              <h3>Endpoint Prometheus</h3>
+              <p>`/metrics` expose requêtes, latence, CO₂ estimé et taille FP32/INT8.</p>
+            </div>
+            <div class="card mint">
+              <h3>Résumé JSON</h3>
+              <p>`/api/monitoring/summary` donne une vue rapide pour debug et démonstration.</p>
+            </div>
+            <div class="card">
+              <h3>Gate CI</h3>
+              <p>`scripts.check_monitoring` vérifie que les métriques restent disponibles.</p>
+            </div>
+          </div>
+          <div class="note">
+            Monitoring frugal : peu de métriques, faible cardinalité, aucun dashboard lourd obligatoire.
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
             <span class="eyebrow">Éco-conception</span>
             <span class="eyebrow">Décisions</span>
           </div>
@@ -627,7 +652,7 @@
 
         <div class="progress"><div class="bar" id="bar"></div></div>
         <footer class="footer">
-          <span id="counter">Slide 1 / 12</span>
+          <span id="counter">Slide 1 / 13</span>
           <span>
             <button id="prev" type="button">Précédent</button>
             <button id="next" type="button">Suivant</button>

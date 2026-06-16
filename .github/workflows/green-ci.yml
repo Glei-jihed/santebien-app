@@ -71,6 +71,9 @@ jobs:
       - name: Tests
         run: pytest -q
 
+      - name: Check monitoring
+        run: python -m scripts.check_monitoring
+
       - name: Measure AI model footprint
         run: python -m scripts.measure_ai_model
 

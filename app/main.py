@@ -3,7 +3,7 @@ from pathlib import Path
 from time import perf_counter
 
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func, select
 
@@ -11,6 +11,7 @@ from app.cache import Cache
 from app.config import settings
 from app.database import SessionLocal, engine
 from app.models import Article, Base, Question, User
+from app.monitoring import monitoring
 from app.routers import admin, ai, articles, auth, doctors, questions
 from app.seed import seed_data, seed_initial_admin
 
@@ -56,8 +57,10 @@ async def add_measurement_headers(request: Request, call_next):
     response: Response = await call_next(request)
     duration_seconds = perf_counter() - started
     energy_kwh = ESTIMATED_SERVER_WATTS * duration_seconds / 3_600_000
+    co2_kg = energy_kwh * FRANCE_KG_CO2_PER_KWH
+    monitoring.record_request(response.status_code, duration_seconds * 1_000, co2_kg)
     response.headers["X-Process-Time-Ms"] = f"{duration_seconds * 1_000:.3f}"
-    response.headers["X-CO2-Kg"] = f"{energy_kwh * FRANCE_KG_CO2_PER_KWH:.12f}"
+    response.headers["X-CO2-Kg"] = f"{co2_kg:.12f}"
     response.headers["X-Cache-Backend"] = cache.backend
     return response
 
@@ -94,6 +97,16 @@ async def cache_metrics() -> dict:
         "questions": questions.cache.stats(),
         "articles": articles.cache.stats(),
     }
+
+
+@app.get("/api/monitoring/summary")
+async def monitoring_summary() -> dict:
+    return monitoring.snapshot()
+
+
+@app.get("/metrics", response_class=PlainTextResponse)
+async def prometheus_metrics() -> str:
+    return monitoring.prometheus_text()
 
 
 app.mount("/assets", StaticFiles(directory=STATIC_DIR), name="assets")

@@ -49,12 +49,19 @@ def test_normalize_external_postgres_urls():
 async def test_health_and_frontend(client):
     health = await client.get("/api/health")
     cache_metrics = await client.get("/api/metrics/cache")
+    monitoring_summary = await client.get("/api/monitoring/summary")
+    prometheus_metrics = await client.get("/metrics")
     frontend = await client.get("/")
 
     assert health.status_code == 200
     assert health.headers["X-CO2-Kg"]
     assert cache_metrics.status_code == 200
     assert "questions" in cache_metrics.json()
+    assert monitoring_summary.status_code == 200
+    assert monitoring_summary.json()["model"]["size_reduction_percent"] == 74.33
+    assert prometheus_metrics.status_code == 200
+    assert "santebien_requests_total" in prometheus_metrics.text
+    assert "santebien_model_size_bytes" in prometheus_metrics.text
     assert "SanteBien" in frontend.text
 
 

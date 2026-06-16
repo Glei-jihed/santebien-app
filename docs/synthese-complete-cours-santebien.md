@@ -52,6 +52,7 @@ Pourquoi ce choix est frugal :
 | Mesurer l'énergie | CO₂ estimé par inférence |
 | Green gates | Seuils bloquants sur compression, accuracy, latence, CO₂ |
 | CI/CD vert | Workflow GitHub Actions avec jobs ciblés |
+| Monitoring frugal | `/metrics`, `/api/monitoring/summary`, contrôle CI |
 | Sécurité frugale | Bandit, secrets hors code, modèle non diagnostique |
 | Déploiement sobre | Docker multi-stage, image contrôlée |
 
@@ -150,13 +151,36 @@ Le workflow `.github/workflows/green-ci.yml` applique les normes du cours :
 - tests automatisés ;
 - scan sécurité Bandit ;
 - mesure FP32/INT8 avec `scripts.measure_ai_model` ;
+- vérification monitoring avec `scripts.check_monitoring` ;
 - green gates modèle avec `scripts.green_gates` ;
 - build Docker ;
 - contrôle de taille d'image.
 
 La CI est maintenant centrée sur le modèle : l'API/cache reste mesuré comme contexte, mais les gates principales sont FP32/INT8.
 
-## 10. Contexte API secondaire
+## 10. Monitoring frugal
+
+Le monitoring est volontairement léger.
+
+| Élément | Rôle |
+|---|---|
+| `/metrics` | Export Prometheus texte |
+| `/api/monitoring/summary` | Résumé JSON lisible |
+| `santebien_requests_total` | Nombre de requêtes observées |
+| `santebien_request_latency_average_ms` | Latence moyenne |
+| `santebien_co2_total_kg` | CO₂ estimé cumulé |
+| `santebien_model_size_bytes` | Taille FP32 et INT8 |
+| `santebien_model_size_reduction_percent` | Gain de taille du modèle |
+
+Pourquoi c'est frugal :
+
+- peu de métriques ;
+- faible cardinalité ;
+- pas de dashboard obligatoire ;
+- compatible Prometheus/Grafana si le projet grandit ;
+- vérifié automatiquement en CI.
+
+## 11. Contexte API secondaire
 
 Ces mesures montrent que l'application autour du modèle reste légère.
 
@@ -169,11 +193,11 @@ Ces mesures montrent que l'application autour du modèle reste légère.
 
 À dire clairement : l'optimisation API est utile, mais le livrable principal du cours est l'analyse du modèle.
 
-## 11. Phrase orale courte
+## 12. Phrase orale courte
 
-> Nous avons appliqué la démarche IA frugale sur le modèle de SanteBien. La baseline FP32 pèse 600 bytes. Après quantification INT8, le modèle pèse 154 bytes, soit -74,33 %. L'accuracy reste à 100 % sur l'échantillon et l'accord FP32/INT8 est de 100 %. La latence INT8 est légèrement plus haute en Python, mais elle reste sous le seuil de 0,1 ms. Ces résultats sont protégés par des green gates dans la CI/CD verte.
+> Nous avons appliqué la démarche IA frugale sur le modèle de SanteBien. La baseline FP32 pèse 600 bytes. Après quantification INT8, le modèle pèse 154 bytes, soit -74,33 %. L'accuracy reste à 100 % sur l'échantillon et l'accord FP32/INT8 est de 100 %. La latence INT8 est légèrement plus haute en Python, mais elle reste sous le seuil de 0,1 ms. Ces résultats sont protégés par des green gates dans la CI/CD verte et surveillés par un monitoring Prometheus léger.
 
-## 12. Prochaines étapes
+## 13. Prochaines étapes
 
 - augmenter l'échantillon de validation ;
 - ajouter des questions réelles anonymisées ;
