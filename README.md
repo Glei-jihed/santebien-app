@@ -56,6 +56,14 @@ En production, `SEED_DEMO_DATA=false` evite de publier les comptes de demo.
 Le premier administrateur est cree automatiquement avec `ADMIN_EMAIL` et
 `ADMIN_PASSWORD` si ces secrets sont presents.
 
+Une base PostgreSQL externe gratuite comme Neon ou Supabase peut aussi etre
+utilisee. Copier l'URL Postgres fournie par le service puis la definir comme
+secret :
+
+```bash
+fly secrets set DATABASE_URL="postgresql://..."
+```
+
 Sans `REDIS_URL`, l'application fonctionne avec un cache memoire de secours.
 
 ## Lancement local leger
