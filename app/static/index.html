@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="SanteBien, la communaute qui partage des experiences sante avec des medecins verifies."
+    />
+    <title>SanteBien - La communaute sante fiable</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu" aria-label="Ouvrir le menu">Menu</button>
+        <a class="brand" href="#/questions" aria-label="SanteBien accueil">
+          <span class="brand-mark">S+</span>
+          <span>Sante<span>Bien</span></span>
+        </a>
+
+        <form class="search" id="global-search">
+          <span class="search-icon">⌕</span>
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Rechercher une question, un sujet..."
+            autocomplete="off"
+          />
+          <kbd>Entrée</kbd>
+        </form>
+
+        <div class="top-actions" id="top-actions">
+          <button class="button ghost" data-action="login">Connexion</button>
+          <button class="button primary" data-action="register">Créer un compte</button>
+        </div>
+      </header>
+
+      <aside class="sidebar" id="sidebar">
+        <nav>
+          <p class="nav-label">Explorer</p>
+          <a href="#/questions" data-nav="questions"><span>Q</span> Questions</a>
+          <a href="#/articles" data-nav="articles"><span>A</span> Articles santé</a>
+          <a href="#/ask" data-nav="ask"><span>+</span> Poser une question</a>
+
+          <p class="nav-label">Mon espace</p>
+          <a href="#/profile" data-nav="profile"><span>P</span> Mon profil</a>
+          <a href="#/doctor" data-nav="doctor"><span>M</span> Devenir médecin vérifié</a>
+          <a href="#/admin" data-nav="admin" class="admin-link hidden"><span>V</span> Validations admin</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <strong>Une urgence ?</strong>
+          <p>SanteBien ne remplace jamais une consultation ou les services d'urgence.</p>
+          <span>Appelez le 15 ou le 112.</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div id="app-content" aria-live="polite"></div>
+      </main>
+
+      <aside class="right-rail" id="right-rail">
+        <section class="rail-card highlight">
+          <span class="eyebrow">SanteBien</span>
+          <h3>Des échanges plus fiables</h3>
+          <p>Les conseils des médecins portent un badge vérifié. Les témoignages restent clairement identifiés.</p>
+        </section>
+
+        <section class="rail-card">
+          <h3>Communauté</h3>
+          <div class="stats-grid" id="stats-grid">
+            <div><strong>-</strong><span>Membres</span></div>
+            <div><strong>-</strong><span>Questions</span></div>
+            <div><strong>-</strong><span>Médecins</span></div>
+            <div><strong>-</strong><span>Articles</span></div>
+          </div>
+        </section>
+
+        <section class="rail-card">
+          <h3>Sujets populaires</h3>
+          <div class="tag-cloud">
+            <button data-tag="sommeil">sommeil</button>
+            <button data-tag="prevention">prévention</button>
+            <button data-tag="bien-etre">bien-être</button>
+            <button data-tag="fatigue">fatigue</button>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <div class="modal-backdrop hidden" id="modal-backdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="modal-close" id="modal-close" aria-label="Fermer">×</button>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>

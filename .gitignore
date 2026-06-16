@@ -1,0 +1,14 @@
+.env
+.env.local
+.DS_Store
+app/.DS_Store
+.venv/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.db
+*.sqlite
+*.sqlite3
+*.prof
+outputs/
+tmp/
