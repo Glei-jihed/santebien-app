@@ -16,6 +16,8 @@ def normalize_database_url(url: str) -> str:
     sslmode = query.pop("sslmode", None)
     if sslmode and "ssl" not in query:
         query["ssl"] = "require" if sslmode in {"require", "verify-ca", "verify-full"} else sslmode
+    if parts.hostname and parts.hostname.endswith(".render.com") and "ssl" not in query:
+        query["ssl"] = "require"
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
 
 

@@ -3,6 +3,7 @@ from uuid import uuid4
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from app.config import normalize_database_url
 from app.database import SessionLocal, engine
 from app.main import app
 from app.models import Base
@@ -30,6 +31,18 @@ async def login(client: AsyncClient, email: str, password: str) -> dict:
     response = await client.post("/api/auth/login", json={"email": email, "password": password})
     assert response.status_code == 200
     return response.json()
+
+
+def test_normalize_external_postgres_urls():
+    assert normalize_database_url("postgresql://user:pass@example.com/db").startswith("postgresql+asyncpg://")
+    assert (
+        normalize_database_url("postgresql://user:pass@example.com/db?sslmode=require")
+        == "postgresql+asyncpg://user:pass@example.com/db?ssl=require"
+    )
+    assert (
+        normalize_database_url("postgresql://user:pass@db.frankfurt-postgres.render.com/app")
+        == "postgresql+asyncpg://user:pass@db.frankfurt-postgres.render.com/app?ssl=require"
+    )
 
 
 @pytest.mark.asyncio
