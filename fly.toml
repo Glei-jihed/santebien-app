@@ -1,16 +1,16 @@
-app = "santebien-edgar-jihed"
+app = "santebien-app"
 primary_region = "cdg"
 
 [build]
   dockerfile = "Dockerfile"
 
 [env]
-  PORT = "8000"
+  PORT = "8080"
   SESSION_DAYS = "14"
   SEED_DEMO_DATA = "false"
 
 [http_service]
-  internal_port = 8000
+  internal_port = 8080
   force_https = true
   auto_stop_machines = "stop"
   auto_start_machines = true

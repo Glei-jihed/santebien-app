@@ -30,6 +30,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://santebien:santebien@postgres:5432/santebien
       REDIS_URL: redis://redis:6379/0
       SEED_DEMO_DATA: "true"
+      PORT: "8000"
     ports:
       - "8000:8000"
     depends_on:
