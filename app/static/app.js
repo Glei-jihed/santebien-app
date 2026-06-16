@@ -242,7 +242,8 @@ function renderQuestionForm() {
       <div class="field"><label>Titre</label><input name="title" minlength="10" maxlength="180" required placeholder="Ex. Comment améliorer progressivement mon sommeil ?" /><small>Une phrase précise qui résume le sujet.</small></div>
       <div class="field"><label>Description</label><textarea name="description" minlength="20" required placeholder="Contexte, habitudes déjà testées, objectif recherché..."></textarea></div>
       <div class="field"><label>Tags</label><input name="tags" placeholder="sommeil, prévention, bien-être" /><small>Maximum cinq tags, séparés par des virgules.</small></div>
-      <div class="form-actions"><button class="button primary">Publier la question</button><a class="button ghost" href="#/questions">Annuler</a></div>
+      <div class="ai-panel hidden" id="ai-analysis"></div>
+      <div class="form-actions"><button class="button ghost" type="button" data-ai-analyze>Analyser avec l'IA frugale</button><button class="button primary">Publier la question</button><a class="button ghost" href="#/questions">Annuler</a></div>
     </form>`;
 }
 
@@ -441,6 +442,32 @@ document.addEventListener("click", async (event) => {
   if (sort) {
     state.sort = sort;
     await renderQuestions();
+  }
+
+  const analyze = event.target.closest("[data-ai-analyze]");
+  if (analyze) {
+    const form = document.querySelector("#question-form");
+    const panel = document.querySelector("#ai-analysis");
+    const values = Object.fromEntries(new FormData(form));
+    try {
+      const result = await api("/ai/analyze-question", {
+        method: "POST",
+        body: JSON.stringify({
+          title: values.title,
+          description: values.description,
+          tags: values.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+          mode: "int8",
+        }),
+      });
+      panel.classList.remove("hidden");
+      panel.innerHTML = `
+        <div><strong>Catégorie IA :</strong> ${escapeHtml(result.category)} · confiance ${(result.confidence * 100).toFixed(1)} %</div>
+        <div><strong>Orientation :</strong> ${escapeHtml(result.urgency)}</div>
+        <div><strong>Modèle :</strong> FP32 ${result.model.fp32_size_bytes} B → INT8 ${result.model.int8_size_bytes} B (${result.model.compression_percent} % de réduction)</div>
+        <small>${escapeHtml(result.disclaimer)}</small>`;
+    } catch (error) {
+      toast(error.message, "error");
+    }
   }
 
   const voteId = event.target.closest("[data-vote-question]")?.dataset.voteQuestion;

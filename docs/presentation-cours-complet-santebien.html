@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SanteBien - IA Frugale & DevOps Vert</title>
+    <style>
+      :root {
+        --bg: #eff4ec;
+        --paper: #fffdf5;
+        --ink: #14221d;
+        --muted: #5c6e65;
+        --green: #126d54;
+        --deep: #0d382e;
+        --mint: #dff4e9;
+        --orange: #ec7a45;
+        --sand: #f8e9c8;
+        --blue: #315f7c;
+        --line: rgba(20, 34, 29, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 28px;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 10% 0%, rgba(18, 109, 84, 0.18), transparent 30%),
+          radial-gradient(circle at 92% 8%, rgba(236, 122, 69, 0.16), transparent 30%),
+          linear-gradient(135deg, #eef4eb, #f8efdc);
+        color: var(--ink);
+        font-family: "Aptos", "Segoe UI", Arial, sans-serif;
+      }
+
+      .deck {
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+
+      .top {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        color: var(--deep);
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .stage {
+        overflow: hidden;
+        border-radius: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 30px 80px rgba(18, 42, 33, 0.16);
+        background: var(--paper);
+        position: relative;
+      }
+
+      .slide {
+        display: none;
+        min-height: 740px;
+        padding: 48px 54px 44px;
+        background: linear-gradient(180deg, rgba(255, 253, 245, 0.98), rgba(250, 247, 237, 0.98));
+      }
+
+      .slide.active {
+        display: block;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow,
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 8px 13px;
+        background: var(--mint);
+        color: var(--deep);
+        font-weight: 900;
+        font-size: 13px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      .tag {
+        margin: 4px;
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 15px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 960px;
+        font-size: 54px;
+        line-height: 1.03;
+        letter-spacing: -0.055em;
+      }
+
+      h2 {
+        font-size: 34px;
+        letter-spacing: -0.035em;
+      }
+
+      h3 {
+        font-size: 24px;
+        line-height: 1.15;
+      }
+
+      .subtitle {
+        margin-top: 18px;
+        max-width: 920px;
+        color: #31443b;
+        font-size: 23px;
+        line-height: 1.38;
+      }
+
+      .grid2,
+      .grid3,
+      .grid4 {
+        display: grid;
+        gap: 18px;
+      }
+
+      .grid2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        padding: 24px;
+        background: var(--paper);
+        box-shadow: 0 14px 34px rgba(20, 42, 34, 0.06);
+      }
+
+      .card.mint {
+        background: var(--mint);
+      }
+
+      .card.sand {
+        background: var(--sand);
+      }
+
+      .card.deep {
+        background: linear-gradient(145deg, #104735, #102f29);
+        color: white;
+      }
+
+      .card.orange {
+        background: #ffe3d5;
+      }
+
+      .card p,
+      .card li {
+        color: #3a4e45;
+        font-size: 20px;
+        line-height: 1.38;
+      }
+
+      .deep p,
+      .deep li {
+        color: #e4f7ec;
+      }
+
+      ul {
+        margin: 14px 0 0;
+        padding-left: 22px;
+      }
+
+      li {
+        margin: 8px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        font-size: 18px;
+      }
+
+      th {
+        background: #e8f4ed;
+        color: var(--deep);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 46px;
+        letter-spacing: -0.045em;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.25;
+      }
+
+      .gain {
+        color: var(--green);
+      }
+
+      .loss {
+        color: var(--orange);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.08fr 0.92fr;
+        gap: 22px;
+        margin-top: 38px;
+      }
+
+      .big {
+        min-height: 340px;
+        border-radius: 34px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        background:
+          radial-gradient(circle at top, rgba(255, 255, 255, 0.26), transparent 32%),
+          linear-gradient(145deg, #0f6f57, #0f3b30);
+        color: white;
+      }
+
+      .big strong {
+        display: block;
+        font-size: 88px;
+        line-height: 0.95;
+        letter-spacing: -0.07em;
+      }
+
+      .big span {
+        display: block;
+        margin-top: 16px;
+        font-size: 25px;
+        color: #dff8ec;
+      }
+
+      .note {
+        margin-top: 22px;
+        padding: 18px 20px;
+        border-left: 5px solid var(--green);
+        border-radius: 18px;
+        background: #edf8f1;
+        font-size: 20px;
+        line-height: 1.4;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .step {
+        min-height: 158px;
+      }
+
+      .num {
+        display: inline-grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 13px;
+        background: var(--deep);
+        color: white;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 22px;
+        background: var(--deep);
+        color: #eafff4;
+        font-weight: 800;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 16px;
+        background: white;
+        color: var(--deep);
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .barwrap {
+        height: 5px;
+        background: rgba(13, 56, 46, 0.15);
+      }
+
+      .bar {
+        height: 100%;
+        width: 0;
+        background: var(--orange);
+        transition: width 200ms ease;
+      }
+
+      @media (max-width: 900px) {
+        body {
+          padding: 12px;
+        }
+
+        .slide {
+          padding: 30px 24px;
+          min-height: auto;
+        }
+
+        h1 {
+          font-size: 38px;
+        }
+
+        .grid2,
+        .grid3,
+        .grid4,
+        .hero,
+        .flow {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media print {
+        body {
+          padding: 0;
+          background: white;
+        }
+
+        .top,
+        .footer,
+        .barwrap {
+          display: none;
+        }
+
+        .stage {
+          box-shadow: none;
+          border-radius: 0;
+        }
+
+        .slide {
+          display: block !important;
+          min-height: 100vh;
+          page-break-after: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="deck">
+      <div class="top">
+        <span>SanteBien - IA Frugale & DevOps Vert</span>
+        <span>Flèches clavier pour naviguer</span>
+      </div>
+
+      <section class="stage">
+        <article class="slide active">
+          <div class="header">
+            <span class="eyebrow">Présentation finale</span>
+            <span class="eyebrow">Edgar & Jihed</span>
+          </div>
+          <h1>Ce que nous avons appliqué du cours sur SanteBien</h1>
+          <p class="subtitle">
+            Une application santé full-stack mesurée, optimisée, dockerisée et préparée pour un
+            déploiement sobre.
+          </p>
+          <div class="hero">
+            <div class="card deep">
+              <h2>Objectif du cours</h2>
+              <p>Mesurer, profiler, optimiser, valider les gains et expliquer les pertes restantes.</p>
+            </div>
+            <div class="card mint">
+              <h2>Résultat clé</h2>
+              <div class="metric">
+                <strong class="gain">-91,44 %</strong>
+                <span>de latence moyenne grâce au cache</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Projet</span>
+            <span class="eyebrow">Santé</span>
+          </div>
+          <h1>SanteBien : le Stack Overflow de la santé</h1>
+          <div class="grid3" style="margin-top: 34px">
+            <div class="card">
+              <h3>Communauté</h3>
+              <p>Questions, réponses, commentaires, tags, recherche et votes.</p>
+            </div>
+            <div class="card">
+              <h3>Médecins</h3>
+              <p>Demande de validation, justificatifs, approbation admin et badge médecin.</p>
+            </div>
+            <div class="card">
+              <h3>Articles</h3>
+              <p>Les médecins vérifiés peuvent publier des contenus pédagogiques.</p>
+            </div>
+          </div>
+          <div class="note">Stack : FastAPI, PostgreSQL externe générique, Redis/mémoire, Docker, CI/CD vert.</div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Mapping cours</span>
+            <span class="eyebrow">Concepts appliqués</span>
+          </div>
+          <h1>Les concepts du cours utilisés</h1>
+          <div class="flow">
+            <div class="card step"><span class="num">1</span><h3>Baseline</h3><p>Mesure FP32.</p></div>
+            <div class="card step"><span class="num">2</span><h3>Optimisation</h3><p>Quantification INT8.</p></div>
+            <div class="card step"><span class="num">3</span><h3>Perte</h3><p>Accuracy et accord.</p></div>
+            <div class="card step"><span class="num">4</span><h3>Green CI</h3><p>Gates modèle.</p></div>
+            <div class="card step"><span class="num">5</span><h3>Docker</h3><p>Multi-stage slim.</p></div>
+            <div class="card step"><span class="num">6</span><h3>Infra</h3><p>K8s right-sized.</p></div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Mesurer avant</span>
+            <span class="eyebrow">Baseline</span>
+          </div>
+          <h1>On n'optimise que ce qu'on mesure</h1>
+          <div class="grid4" style="margin-top: 34px">
+            <div class="card"><div class="metric"><strong>600 B</strong><span>taille FP32</span></div></div>
+            <div class="card"><div class="metric"><strong>100 %</strong><span>accuracy FP32</span></div></div>
+            <div class="card"><div class="metric"><strong>0,0195 ms</strong><span>latence FP32</span></div></div>
+            <div class="card"><div class="metric"><strong>1500</strong><span>inférences mesurées</span></div></div>
+          </div>
+          <div class="note">Outil : `scripts.measure_ai_model` compare la baseline FP32 et l'optimisation INT8.</div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Optimisation</span>
+            <span class="eyebrow">INT8</span>
+          </div>
+          <h1>Quick Win : quantification du modèle</h1>
+          <div class="grid2" style="margin-top: 34px">
+            <div class="card orange">
+              <h2>Avant FP32</h2>
+              <ul>
+                <li>600 bytes.</li>
+                <li>Accuracy 100 %.</li>
+                <li>Latence 0,0195 ms.</li>
+                <li>CO₂ 9,8583e-12 kg.</li>
+              </ul>
+            </div>
+            <div class="card mint">
+              <h2>Après INT8</h2>
+              <ul>
+                <li>154 bytes.</li>
+                <li>Accuracy 100 %.</li>
+                <li>Latence 0,0253 ms.</li>
+                <li>CO₂ 1,2791e-11 kg.</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Gain</span>
+            <span class="eyebrow">Avant / après</span>
+          </div>
+          <h1>Le gain mesuré</h1>
+          <div class="big" style="margin-top: 30px">
+            <div>
+              <strong>-74,33 %</strong>
+              <span>de taille modèle grâce à INT8</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Résultats</span>
+            <span class="eyebrow">Chiffrés</span>
+          </div>
+          <h1>Avant / après modèle</h1>
+          <table style="margin-top: 30px">
+            <thead>
+              <tr><th>Indicateur</th><th>FP32</th><th>INT8</th><th>Gain / perte</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Taille</td><td>600 bytes</td><td>154 bytes</td><td class="gain">-74,33 %</td></tr>
+              <tr><td>Accuracy</td><td>100 %</td><td>100 %</td><td class="gain">0 point perdu</td></tr>
+              <tr><td>Accord FP32/INT8</td><td>-</td><td>100 %</td><td class="gain">OK</td></tr>
+              <tr><td>Latence moyenne</td><td>0,0195 ms</td><td>0,0253 ms</td><td class="loss">+29,74 %</td></tr>
+              <tr><td>CO₂ par inférence</td><td>9,8583e-12 kg</td><td>1,2791e-11 kg</td><td class="loss">+29,74 %</td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Profiling</span>
+            <span class="eyebrow">cProfile</span>
+          </div>
+          <h1>Ce que montre le profiling</h1>
+          <div class="grid2" style="margin-top: 30px">
+            <div class="card">
+              <h2>Hotspots observés</h2>
+              <ul>
+                <li>`exercise_api`</li>
+                <li>`httpx.AsyncClient.get`</li>
+                <li>`httpx.AsyncClient.request`</li>
+                <li>`starlette.routing`</li>
+                <li>`asgi.handle_async_request`</li>
+              </ul>
+            </div>
+            <div class="card sand">
+              <h2>Conclusion</h2>
+              <p>Le coût principal vient surtout du framework et du banc de test. Le code métier n'est pas encore le hotspot dominant.</p>
+            </div>
+          </div>
+          <div class="note">Décision : le profiling API reste un contexte, mais la présentation finale se concentre sur la quantification du modèle.</div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Green gates</span>
+            <span class="eyebrow">CI/CD vert</span>
+          </div>
+          <h1>Des seuils pour bloquer les régressions</h1>
+          <div class="grid4" style="margin-top: 34px">
+            <div class="card"><div class="metric"><strong>74,33 %</strong><span>compression >= 70 %</span></div></div>
+            <div class="card"><div class="metric"><strong>100 %</strong><span>accord >= 95 %</span></div></div>
+            <div class="card"><div class="metric"><strong>154 B</strong><span>taille <= 200 B</span></div></div>
+            <div class="card"><div class="metric"><strong>0,0253 ms</strong><span>latence <= 0,1 ms</span></div></div>
+          </div>
+          <div class="note">Artefacts : `.github/workflows/green-ci.yml` et `scripts/green_gates.py`.</div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">DevOps frugal</span>
+            <span class="eyebrow">Industrialisation</span>
+          </div>
+          <h1>Ce qui a été préparé pour l'industrialisation</h1>
+          <table style="margin-top: 30px">
+            <thead><tr><th>Concept</th><th>Artefact</th><th>But frugal</th></tr></thead>
+            <tbody>
+              <tr><td>Docker multi-stage</td><td>`Dockerfile`</td><td>Image plus légère</td></tr>
+              <tr><td>CI/CD vert</td><td>`green-ci.yml`</td><td>Jobs utiles seulement</td></tr>
+              <tr><td>Load test</td><td>`locustfile.py`</td><td>Valider le comportement sous charge</td></tr>
+              <tr><td>K8s right-sizing</td><td>`infra/k8s/*`</td><td>Requests/limits raisonnables</td></tr>
+              <tr><td>Secrets</td><td>env vars</td><td>Aucun secret dans GitHub</td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">IA frugale</span>
+            <span class="eyebrow">FP32 / INT8</span>
+          </div>
+          <h1>Mini-modèle IA quantifié</h1>
+          <div class="grid4" style="margin-top: 34px">
+            <div class="card"><div class="metric"><strong>600 B</strong><span>taille FP32</span></div></div>
+            <div class="card"><div class="metric"><strong>154 B</strong><span>taille INT8</span></div></div>
+            <div class="card"><div class="metric"><strong>-74,33 %</strong><span>taille modèle</span></div></div>
+            <div class="card"><div class="metric"><strong>100 %</strong><span>accord FP32/INT8</span></div></div>
+          </div>
+          <div class="note">Le modèle classe les questions par catégorie sans diagnostic médical : prévention, nutrition, mental, dermatologie, respiratoire ou orientation.</div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Pertes</span>
+            <span class="eyebrow">Limites</span>
+          </div>
+          <h1>Ce qui reste à améliorer</h1>
+          <div class="grid3" style="margin-top: 34px">
+            <div class="card"><h3>Échantillon</h3><p>Ajouter plus de questions réelles pour renforcer l'accuracy.</p></div>
+            <div class="card"><h3>Mesures prod</h3><p>Rejouer FP32/INT8 après déploiement réel.</p></div>
+            <div class="card"><h3>IA future</h3><p>Comparer tout modèle plus riche à la baseline frugale avant de l'accepter.</p></div>
+          </div>
+          <div class="note">La frugalité n'est pas un état final : c'est une boucle mesurer -> optimiser -> re-mesurer.</div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Conclusion</span>
+            <span class="eyebrow">Objectif atteint</span>
+          </div>
+          <h1>Ce qu'on a gagné pendant le cours</h1>
+          <div class="grid3" style="margin-top: 34px">
+            <div class="card"><h3>Technique</h3><p>Une vraie app FastAPI/PostgreSQL/Docker avec endpoint IA.</p></div>
+            <div class="card"><h3>Mesure</h3><p>Des métriques concrètes : taille, accuracy, accord, latence, CO₂.</p></div>
+            <div class="card"><h3>Optimisation</h3><p>Un modèle INT8 avec -74,33 % de taille.</p></div>
+          </div>
+          <div class="note">Phrase finale : nous avons mesuré FP32, optimisé INT8, validé la perte et automatisé les gates.</div>
+        </article>
+
+        <article class="slide">
+          <div class="header">
+            <span class="eyebrow">Script oral</span>
+            <span class="eyebrow">2 minutes</span>
+          </div>
+          <h1>Ce qu'on peut dire au professeur</h1>
+          <div class="card" style="margin-top: 28px">
+            <p style="font-size: 23px; line-height: 1.48">
+              Notre projet SanteBien applique les concepts du cours sur un mini-modèle IA non diagnostique.
+              Nous avons mesuré la baseline FP32, puis appliqué une quantification INT8. Le modèle passe de
+              600 bytes à 154 bytes, soit -74,33 % de taille. L'accuracy reste à 100 % sur notre échantillon
+              et l'accord FP32/INT8 est de 100 %, donc nous n'observons pas de perte de qualité. La latence
+              La latence INT8 augmente de 29,74 % dans cette implémentation Python, mais reste sous le seuil. Ces résultats sont protégés par une Green CI :
+              si compression, accuracy, accord, taille, latence ou CO₂ régressent, le pipeline échoue.
+            </p>
+          </div>
+        </article>
+
+        <div class="barwrap"><div class="bar" id="bar"></div></div>
+        <footer class="footer">
+          <span id="counter">Slide 1 / 13</span>
+          <span>
+            <button id="prev" type="button">Précédent</button>
+            <button id="next" type="button">Suivant</button>
+          </span>
+        </footer>
+      </section>
+    </main>
+
+    <script>
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const counter = document.querySelector("#counter");
+      const bar = document.querySelector("#bar");
+      let index = 0;
+
+      function showSlide(next) {
+        index = Math.max(0, Math.min(slides.length - 1, next));
+        slides.forEach((slide, position) => slide.classList.toggle("active", position === index));
+        counter.textContent = `Slide ${index + 1} / ${slides.length}`;
+        bar.style.width = `${((index + 1) / slides.length) * 100}%`;
+      }
+
+      document.querySelector("#prev").addEventListener("click", () => showSlide(index - 1));
+      document.querySelector("#next").addEventListener("click", () => showSlide(index + 1));
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight" || event.key === " ") showSlide(index + 1);
+        if (event.key === "ArrowLeft") showSlide(index - 1);
+        if (event.key === "Home") showSlide(0);
+        if (event.key === "End") showSlide(slides.length - 1);
+      });
+
+      showSlide(0);
+    </script>
+  </body>
+</html>

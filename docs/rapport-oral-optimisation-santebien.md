@@ -1,174 +1,153 @@
-# Rapport oral simple - Optimisation SanteBien
+# Rapport oral - Analyse modèle IA frugal SanteBien
 
-## Message principal à retenir
+## Message principal
 
-Notre objectif de cours était de mesurer avant d'optimiser, appliquer une optimisation ciblée, puis prouver le gain avec des chiffres.
-
-Sur SanteBien, nous avons optimisé le parcours le plus fréquent : la lecture répétée des questions et des articles. L'optimisation principale est le cache.
+L'objectif du cours est appliqué sur le modèle IA : mesurer une baseline FP32, optimiser en INT8, comparer avant/après, puis bloquer les régressions avec des green gates.
 
 Résultat clé :
 
 ```text
-Le cache réduit la latence moyenne de 92,30 %.
+Le modèle INT8 réduit la taille de 74,33 % sans perte d'accuracy observée.
 ```
 
-## 1. Présentation du projet
+## 1. Projet et rôle du modèle
 
 Ce que je peux dire :
 
-> Notre projet s'appelle SanteBien. C'est une application web communautaire de santé, un peu comme Stack Overflow, mais pour poser des questions de santé, répondre, commenter et publier des articles. Les médecins peuvent demander un profil vérifié, et les administrateurs valident les justificatifs.
+> SanteBien est une application santé communautaire. Le modèle IA ajouté ne donne aucun diagnostic médical. Il sert uniquement à classer une question dans une catégorie : prévention, nutrition, santé mentale, dermatologie, respiratoire ou orientation.
 
-Stack technique :
+Pourquoi c'est prudent :
 
-- Backend : FastAPI.
-- Base de données : PostgreSQL.
-- Cache : Redis ou mémoire en local.
-- Frontend : HTML, CSS, JavaScript.
-- Déploiement : Docker, Fly.io, base Render PostgreSQL.
+- le modèle aide à organiser les questions ;
+- il ne remplace pas un médecin ;
+- il affiche un message de sécurité ;
+- il reste petit, explicable et mesurable.
 
-## 2. Objectif du cours appliqué au projet
-
-Ce que je peux dire :
-
-> L'objectif n'était pas seulement de développer l'application. L'objectif était surtout d'appliquer une démarche d'éco-conception : mesurer, identifier les pertes, optimiser, puis comparer les résultats avant/après.
-
-Concepts utilisés :
-
-- Profiling CPU avec `cProfile`.
-- Mesure de latence.
-- Mesure du cache hit rate.
-- Estimation CO₂ avec CodeCarbon et headers applicatifs.
-- Analyse de perte : cache miss, latence restante, CO₂ restant.
-- Règle 80/20.
-- Quick Win d'optimisation.
-
-## 3. Problème identifié
+## 2. Baseline avant optimisation : FP32
 
 Ce que je peux dire :
 
-> Dans une application communautaire, les mêmes questions et articles peuvent être lus plusieurs fois. Si chaque lecture interroge la base de données, on consomme plus de CPU, plus d'I/O, plus de temps et donc plus d'énergie.
+> Nous avons d'abord mesuré le modèle en FP32, qui représente notre version avant optimisation.
 
-Problème technique :
+| Indicateur | FP32 avant |
+|---|---:|
+| Taille modèle | 600 bytes |
+| Accuracy échantillon | 100 % |
+| Latence moyenne | 0,0195 ms |
+| CO₂ par inférence | 9,8583e-12 kg CO₂eq |
+| Inférences mesurées | 1500 |
 
-- lecture répétée des mêmes questions ;
-- risque de requêtes base inutiles ;
-- latence plus élevée ;
-- consommation plus forte.
-
-## 4. Optimisation appliquée
-
-Ce que je peux dire :
-
-> Nous avons ajouté un cache sur les listes de questions, les détails des questions et les articles. Quand une question est lue une première fois, la réponse est stockée. Les lectures suivantes sont servies depuis le cache. Si quelqu'un ajoute un commentaire, vote ou publie un article, le cache concerné est invalidé.
-
-Optimisations concrètes :
-
-- cache liste des questions ;
-- cache détail d'une question ;
-- cache articles ;
-- invalidation après création, commentaire, vote ou article ;
-- validation Pydantic pour rejeter tôt les données invalides ;
-- limite de résultats pour éviter de charger trop de données.
-
-## 5. Résultats avant/après
+## 3. Optimisation appliquée : INT8
 
 Ce que je peux dire :
 
-> Nous avons comparé deux scénarios : une lecture froide sans bénéfice du cache, puis une lecture chaude avec cache optimisé.
+> Nous avons ensuite quantifié le modèle en INT8. Le principe est de stocker les poids avec moins de précision numérique pour réduire la taille et le coût d'exécution.
 
-Résultats principaux :
+| Indicateur | INT8 après |
+|---|---:|
+| Taille modèle | 154 bytes |
+| Accuracy échantillon | 100 % |
+| Accord FP32/INT8 | 100 % |
+| Latence moyenne | 0,0253 ms |
+| CO₂ par inférence | 1,2791e-11 kg CO₂eq |
 
-| Mesure | Sans cache utile | Avec cache | Gain |
+## 4. Comparaison avant/après
+
+| Mesure | FP32 | INT8 | Gain / perte |
 |---|---:|---:|---:|
-| Latence moyenne | 2,7821 ms | 0,2143 ms | -92,30 % |
-| P95 | 3,159 ms | 0,301 ms | -90,47 % |
-| Latence maximale | 18,893 ms | 0,431 ms | -97,72 % |
-| CO₂ estimé | 1,40647e-07 kg | 1,08370e-08 kg | -92,29 % |
-
-Phrase simple à dire :
-
-> Grâce au cache, on divise environ par 13 le coût moyen d'une lecture répétée.
-
-## 6. Profiling CPU
-
-Ce que je peux dire :
-
-> Le profiling montre que le coût principal ne vient pas encore de notre code métier, mais plutôt du framework, de HTTPX, de Starlette et du banc de test. Donc il ne faut pas optimiser au hasard. Le bon Quick Win est bien le cache, car il réduit directement les lectures répétées.
-
-Fonctions dominantes :
-
-| Zone | Temps cumulé | Interprétation |
-|---|---:|---|
-| `exercise_api` | 0,768 s | scénario complet |
-| `httpx.AsyncClient.get` | 0,686 s | client HTTP du test |
-| `httpx.AsyncClient.request` | 0,684 s | orchestration requête |
-| `starlette.routing` | 0,444 s | routage framework |
-| `asgi.handle_async_request` | 0,253 s | transport ASGI |
-
-Conclusion profiling :
-
-> La règle 80/20 ne révèle pas encore un gros hotspot métier. Donc on évite l'optimisation prématurée et on garde l'optimisation qui a un vrai impact mesuré : le cache.
-
-## 7. Analyse des pertes restantes
-
-Ce que je peux dire :
-
-> Après optimisation, il reste quand même des pertes. Une application n'est jamais à zéro coût. On mesure donc les pertes restantes.
-
-Pertes restantes :
-
-- cache miss global : 1,98 % ;
-- P95 restant : 0,331 ms ;
-- CO₂ pour 100 lectures : 7,96e-08 kg CO₂eq ;
-- équivalent voiture : environ 0,398 mm ;
-- perte réseau future possible entre Fly.io et Render PostgreSQL.
+| Taille | 600 bytes | 154 bytes | -74,33 % |
+| Accuracy | 100 % | 100 % | 0 point perdu |
+| Accord prédictions | - | 100 % | aucune divergence |
+| Latence moyenne | 0,0195 ms | 0,0253 ms | +29,74 % |
+| CO₂ par inférence | 9,8583e-12 kg | 1,2791e-11 kg | +29,74 % |
 
 Phrase simple :
 
-> La perte restante est faible en local, mais il faudra refaire la mesure en production car la latence réseau peut changer les résultats.
+> On gagne surtout sur la taille du modèle : -74,33 %. La qualité reste stable. La latence INT8 est légèrement plus haute en Python, mais elle reste très faible et sous le seuil.
 
-## 8. Quick Win choisi
+## 5. Analyse de la perte
 
 Ce que je peux dire :
 
-> Le Quick Win prioritaire est le cache de lecture. Il est simple, peu risqué et très efficace pour notre cas d'usage.
+> La perte importante à surveiller après quantification est la perte de qualité. Ici, nous n'observons aucune perte sur l'échantillon : l'accuracy INT8 reste à 100 % et l'accord FP32/INT8 est aussi à 100 %.
 
-Pourquoi c'est le bon Quick Win :
+Pertes restantes :
 
-- effort faible ;
-- impact élevé ;
-- gain mesuré supérieur à 90 % ;
-- cohérent avec une application où beaucoup de contenus sont lus plusieurs fois ;
-- compatible avec l'éco-conception.
+- l'échantillon de validation est petit ;
+- le modèle est volontairement simple ;
+- il faudra tester plus de questions réelles ;
+- le modèle ne juge pas la validité médicale des réponses.
 
-## 9. Conclusion à dire à la fin
+## 6. Green gates modèle
+
+Ce que je peux dire :
+
+> Les green gates empêchent de livrer une version moins frugale ou moins fiable.
+
+| Gate | Résultat | Seuil | Statut |
+|---|---:|---:|---|
+| Compression INT8 | 74,33 % | ≥ 70 % | OK |
+| Accord FP32/INT8 | 100 % | ≥ 95 % | OK |
+| Accuracy INT8 | 100 % | ≥ 95 % | OK |
+| Taille INT8 | 154 bytes | ≤ 200 bytes | OK |
+| Latence INT8 | 0,0253 ms | ≤ 0,1 ms | OK |
+| CO₂ INT8 | 1,2791e-11 kg | ≤ 1e-10 kg | OK |
+
+## 7. CI/CD vert
+
+Ce que je peux dire :
+
+> Le workflow GitHub Actions exécute les tests, mesure le modèle FP32/INT8, puis lance les green gates. Si la compression, l'accuracy, l'accord, la taille, la latence ou le CO₂ régressent, le pipeline échoue.
+
+Éléments appliqués :
+
+- déclenchement limité aux fichiers utiles ;
+- cache pip ;
+- tests automatisés ;
+- scan sécurité Bandit ;
+- mesure modèle avec `scripts.measure_ai_model` ;
+- green gates avec `scripts.green_gates` ;
+- build Docker et contrôle de taille d'image.
+
+## 8. Contexte API secondaire
+
+Le cache API reste utile, mais ce n'est plus l'analyse principale.
+
+| Indicateur API | Résultat |
+|---|---:|
+| P95 API | 0,288 ms |
+| Cache hit rate | 98,02 % |
+| Gain cache | -91,44 % |
+| CO₂ par requête API | 6,34e-10 kg |
+
+Phrase à dire :
+
+> L'API est aussi légère, mais le livrable principal du cours est maintenant bien centré sur le modèle.
+
+## 9. Conclusion orale
 
 Version courte :
 
-> Nous avons respecté la démarche du cours : mesurer, profiler, optimiser et valider. L'optimisation par cache réduit la latence moyenne de 92,30 %, le P95 de 90,47 % et l'impact CO₂ estimé de 92,29 %. Les pertes restantes sont faibles en local, mais devront être mesurées après le déploiement réel.
+> Nous avons appliqué la démarche IA frugale sur un modèle réel de SanteBien. Nous avons mesuré le modèle FP32, puis nous l'avons quantifié en INT8. La taille passe de 600 bytes à 154 bytes, soit -74,33 %. L'accuracy reste à 100 % sur l'échantillon et l'accord FP32/INT8 est de 100 %, donc nous n'observons pas de perte de qualité. La latence INT8 est légèrement plus haute en Python, mais reste très faible et sous le seuil de 0,1 ms. Enfin, la CI/CD verte bloque toute régression avec des green gates centrées sur le modèle.
 
 Version très courte :
 
-> Notre optimisation principale est le cache. Elle réduit le coût d'une lecture répétée d'environ 92 %. C'est notre Quick Win d'éco-conception.
+> Notre optimisation principale est la quantification INT8 du modèle : -74,33 % de taille, 100 % d'accord FP32/INT8, et des green gates automatisées.
 
-## 10. Questions possibles du professeur
+## 10. Questions possibles
 
-### Pourquoi le cache ?
+### Est-ce que le modèle donne un diagnostic ?
 
-Parce que les questions et articles sont lus plusieurs fois. Cacher ces lectures évite de recalculer et de réinterroger la base.
+Non. Il classe seulement les questions par catégorie. Il ne remplace jamais un médecin.
 
-### Est-ce que vous avez optimisé au hasard ?
+### Quelle est la perte après INT8 ?
 
-Non. Nous avons mesuré avec `cProfile`, puis comparé lecture froide et lecture chaude.
+Sur notre échantillon, aucune perte d'accuracy observée : FP32 = 100 %, INT8 = 100 %, accord = 100 %.
 
-### Quelle est la perte ?
+### Pourquoi ne pas utiliser un gros modèle ?
 
-La perte restante est le cache miss, la latence restante, le CPU consommé par le framework et le CO₂ estimé restant.
+Parce que l'objectif est la frugalité. Un mini-modèle suffit pour classer les questions, coûte moins cher et reste explicable.
 
-### Est-ce que les résultats sont définitifs ?
+### Quel est le prochain travail ?
 
-Non. Les mesures sont locales. Il faudra refaire les mesures en production pour intégrer la latence réseau réelle.
-
-### Quel est le prochain axe d'optimisation ?
-
-Activer Redis externe en production, mesurer la latence Fly.io vers PostgreSQL Render, puis ajouter des index PostgreSQL si la recherche devient coûteuse.
+Augmenter l'échantillon de validation avec plus de questions réelles, puis recalculer accuracy, accord FP32/INT8, latence et CO₂.

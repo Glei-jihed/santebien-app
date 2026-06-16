@@ -6,7 +6,11 @@ from pathlib import Path
 import httpx
 from codecarbon import OfflineEmissionsTracker
 
+from app.database import SessionLocal, engine
 from app.main import app
+from app.models import Base
+from app.routers import questions as questions_router
+from app.seed import seed_data
 
 OUTPUT = Path("outputs/phase-2-measures.json")
 
@@ -20,6 +24,14 @@ def percentile(values: list[float], percent: float) -> float:
 async def measure() -> dict:
     timings: list[float] = []
     co2_headers: list[float] = []
+
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.drop_all)
+        await connection.run_sync(Base.metadata.create_all)
+    async with SessionLocal() as session:
+        await seed_data(session)
+    await questions_router.cache.delete_pattern("santebien:questions:*")
+    await questions_router.cache.delete_pattern("santebien:question:*")
 
     tracker = OfflineEmissionsTracker(
         country_iso_code="FRA",

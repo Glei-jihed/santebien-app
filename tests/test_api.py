@@ -40,8 +40,8 @@ def test_normalize_external_postgres_urls():
         == "postgresql+asyncpg://user:pass@example.com/db?ssl=require"
     )
     assert (
-        normalize_database_url("postgresql://user:pass@db.frankfurt-postgres.render.com/app")
-        == "postgresql+asyncpg://user:pass@db.frankfurt-postgres.render.com/app?ssl=require"
+        normalize_database_url("postgres://user:pass@example.com/db?sslmode=verify-full")
+        == "postgresql+asyncpg://user:pass@example.com/db?ssl=require"
     )
 
 
@@ -56,6 +56,26 @@ async def test_health_and_frontend(client):
     assert cache_metrics.status_code == 200
     assert "questions" in cache_metrics.json()
     assert "SanteBien" in frontend.text
+
+
+@pytest.mark.asyncio
+async def test_ai_question_analysis_is_frugal_and_non_diagnostic(client):
+    response = await client.post(
+        "/api/ai/analyze-question",
+        json={
+            "title": "Comment mieux gérer mon stress au quotidien ?",
+            "description": "Je dors mal depuis plusieurs semaines et je cherche des habitudes simples pour réduire mon angoisse.",
+            "tags": ["stress"],
+            "mode": "int8",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["category"] == "mental"
+    assert payload["model"]["mode"] == "int8"
+    assert payload["model"]["int8_size_bytes"] < payload["model"]["fp32_size_bytes"]
+    assert "aucun diagnostic" in payload["disclaimer"]
 
 
 @pytest.mark.asyncio

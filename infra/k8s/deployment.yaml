@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: santebien-api
+  labels:
+    app: santebien-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: santebien-api
+  template:
+    metadata:
+      labels:
+        app: santebien-api
+    spec:
+      containers:
+        - name: api
+          image: santebien-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PORT
+              value: "8000"
+            - name: SEED_DEMO_DATA
+              value: "false"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: santebien-secrets
+                  key: database-url
+            - name: ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: santebien-secrets
+                  key: admin-email
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: santebien-secrets
+                  key: admin-password
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 8
+            periodSeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"

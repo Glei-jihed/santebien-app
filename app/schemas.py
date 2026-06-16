@@ -26,6 +26,10 @@ class QuestionCreate(BaseModel):
     tags: list[str] = Field(default_factory=list, max_length=5)
 
 
+class QuestionAnalysisRequest(QuestionCreate):
+    mode: Literal["fp32", "int8"] = "int8"
+
+
 class CommentCreate(BaseModel):
     content: str = Field(min_length=10, max_length=2_000)
 

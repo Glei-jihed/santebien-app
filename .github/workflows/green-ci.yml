@@ -1,0 +1,94 @@
+name: Green CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "scripts/**"
+      - "tests/**"
+      - "requirements.txt"
+      - "requirements-dev.txt"
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "infra/**"
+      - "locustfile.py"
+      - ".github/workflows/green-ci.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "scripts/**"
+      - "tests/**"
+      - "requirements.txt"
+      - "requirements-dev.txt"
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "infra/**"
+      - "locustfile.py"
+      - ".github/workflows/green-ci.yml"
+
+concurrency:
+  group: green-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-green-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GREEN_MAX_P95_MS: "5.0"
+      GREEN_MIN_CACHE_HIT_PERCENT: "90.0"
+      GREEN_MAX_CO2_PER_REQUEST_KG: "0.000001"
+      GREEN_MIN_LATENCY_GAIN_PERCENT: "50.0"
+      GREEN_MIN_MODEL_COMPRESSION_PERCENT: "70.0"
+      GREEN_MIN_INT8_AGREEMENT_PERCENT: "95.0"
+      GREEN_MIN_INT8_ACCURACY_PERCENT: "95.0"
+      GREEN_MAX_INT8_SIZE_BYTES: "200"
+      GREEN_MAX_INT8_LATENCY_MS: "0.1"
+      GREEN_MAX_INT8_CO2_KG: "0.0000000001"
+      GREEN_MAX_IMAGE_MB: "500"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Compile
+        run: python -m compileall app scripts tests
+
+      - name: Security scan
+        run: python -m bandit -r app -ll
+
+      - name: Tests
+        run: pytest -q
+
+      - name: Measure AI model footprint
+        run: python -m scripts.measure_ai_model
+
+      - name: Measure API context
+        run: python -m scripts.measure_phase2
+
+      - name: Compare API cache context
+        run: python -m scripts.compare_cache_optimization
+
+      - name: Model green gates
+        run: python -m scripts.green_gates
+
+      - name: Docker build check
+        run: docker build -t santebien-ci .
+
+      - name: Docker image size gate
+        run: |
+          size_bytes=$(docker image inspect santebien-ci --format='{{.Size}}')
+          size_mb=$((size_bytes / 1024 / 1024))
+          echo "Image size: ${size_mb} MB"
+          test "$size_mb" -le "$GREEN_MAX_IMAGE_MB"

@@ -11,7 +11,7 @@ from app.cache import Cache
 from app.config import settings
 from app.database import SessionLocal, engine
 from app.models import Article, Base, Question, User
-from app.routers import admin, articles, auth, doctors, questions
+from app.routers import admin, ai, articles, auth, doctors, questions
 from app.seed import seed_data, seed_initial_admin
 
 ESTIMATED_SERVER_WATTS = 35
@@ -64,6 +64,7 @@ async def add_measurement_headers(request: Request, call_next):
 
 api_prefix = "/api"
 app.include_router(auth.router, prefix=api_prefix)
+app.include_router(ai.router, prefix=api_prefix)
 app.include_router(questions.router, prefix=api_prefix)
 app.include_router(articles.router, prefix=api_prefix)
 app.include_router(doctors.router, prefix=api_prefix)

@@ -14,6 +14,7 @@ administrateurs valident les justificatifs medicaux.
 - demande de validation medecin et espace d'approbation admin ;
 - PostgreSQL avec SQLAlchemy async ;
 - cache Redis avec fallback memoire ;
+- mini-modele IA frugal de classification non diagnostique ;
 - headers de mesure `X-Process-Time-Ms` et `X-CO2-Kg` ;
 - front SPA HTML/CSS/JavaScript servi par FastAPI.
 
@@ -27,44 +28,47 @@ docker compose up --build
 
 Puis ouvrir `http://localhost:8000`.
 
-## Deploiement Fly.io
+## Deploiement sobre generique
 
-L'application contient deja un `Dockerfile` et un `fly.toml`. Fly construit
-l'image Docker pendant `fly deploy` et expose le port interne `8000`.
+L'application est preparee pour un deploiement conteneurise sans dependance a un
+fournisseur cloud precis. Le `Dockerfile` expose le port `8000` et lit la
+configuration depuis des variables d'environnement.
 
-```bash
-fly auth login
-fly launch --no-deploy
-fly postgres create
-fly postgres attach <nom-du-cluster-postgres>
-fly secrets set ADMIN_EMAIL="admin@example.com"
-fly secrets set ADMIN_PASSWORD="mot-de-passe-long-et-secret"
-fly secrets set ADMIN_DISPLAY_NAME="Administrateur SanteBien"
-fly deploy
-```
-
-Si le nom `santebien-edgar-jihed` est deja pris, modifier la ligne `app = "..."`
-dans `fly.toml`, ou utiliser `fly apps create <nom-unique>`.
-
-Pour Redis en production, configurer un service Redis compatible et ajouter :
+Variables minimales en production :
 
 ```bash
-fly secrets set REDIS_URL="redis://..."
-```
-
-En production, `SEED_DEMO_DATA=false` evite de publier les comptes de demo.
-Le premier administrateur est cree automatiquement avec `ADMIN_EMAIL` et
-`ADMIN_PASSWORD` si ces secrets sont presents.
-
-Une base PostgreSQL externe gratuite comme Neon ou Supabase peut aussi etre
-utilisee. Copier l'URL Postgres fournie par le service puis la definir comme
-secret :
-
-```bash
-fly secrets set DATABASE_URL="postgresql://..."
+DATABASE_URL="postgresql://user:password@host:5432/santebien?sslmode=require"
+REDIS_URL="redis://host:6379/0"
+SEED_DEMO_DATA="false"
+ADMIN_EMAIL="admin@example.com"
+ADMIN_PASSWORD="mot-de-passe-long-et-secret"
+ADMIN_DISPLAY_NAME="Administrateur SanteBien"
 ```
 
 Sans `REDIS_URL`, l'application fonctionne avec un cache memoire de secours.
+Pour une base PostgreSQL externe, ajouter `?sslmode=require` si le service
+demande une connexion chiffree.
+
+## CI/CD vert
+
+Le pipeline GitHub Actions applique les pratiques du cours DevOps Vert :
+
+- declenchement limite aux fichiers applicatifs utiles ;
+- cache `pip` pour eviter les installations inutiles ;
+- compilation, tests automatises et scan securite leger ;
+- mesure FP32/INT8 du mini-modele IA ;
+- green gates modele sur compression, accuracy, accord, taille, latence et CO2 ;
+- mesure API/cache gardee comme contexte d'eco-conception ;
+- build Docker et controle de taille d'image.
+
+Commandes locales equivalentes :
+
+```bash
+.venv/bin/python -m scripts.measure_phase2
+.venv/bin/python -m scripts.compare_cache_optimization
+.venv/bin/python -m scripts.measure_ai_model
+.venv/bin/python -m scripts.green_gates
+```
 
 ## Lancement local leger
 
@@ -97,3 +101,5 @@ python3 -m venv .venv
 Documentation API : `http://localhost:8000/docs`
 
 Mesures cache : `http://localhost:8000/api/metrics/cache`
+
+Analyse IA non diagnostique : `POST /api/ai/analyze-question`

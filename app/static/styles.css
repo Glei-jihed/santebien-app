@@ -708,8 +708,24 @@ kbd {
 
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 4px;
+}
+
+.ai-panel {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid #b9dfd0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #edf9f4, #fffdf4);
+  color: #25342f;
+  line-height: 1.45;
+}
+
+.ai-panel small {
+  color: var(--muted);
 }
 
 .profile-hero {
