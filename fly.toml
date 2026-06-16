@@ -1,29 +1,40 @@
-app = "santebien-edgar-jihed"
-primary_region = "cdg"
+# fly.toml app configuration file generated for santebien-app on 2026-06-16T10:28:59Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'santebien-app'
+primary_region = 'fra'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  PORT = "8000"
-  SESSION_DAYS = "14"
-  SEED_DEMO_DATA = "false"
+  PORT = '8000'
+  SEED_DEMO_DATA = 'false'
+  SESSION_DAYS = '14'
 
 [http_service]
-  internal_port = 8000
+  internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
   [http_service.concurrency]
-    type = "requests"
-    soft_limit = 100
+    type = 'requests'
     hard_limit = 150
+    soft_limit = 100
 
   [[http_service.checks]]
-    grace_period = "10s"
-    interval = "30s"
-    method = "GET"
-    timeout = "5s"
-    path = "/api/health"
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/api/health'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256
