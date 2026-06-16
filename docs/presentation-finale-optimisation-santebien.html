@@ -548,17 +548,29 @@
           <div class="grid-3" style="margin-top: 34px">
             <div class="card">
               <h3>Endpoint Prometheus</h3>
-              <p>`/metrics` expose requêtes, latence, CO₂ estimé et taille FP32/INT8.</p>
+              <p>`/metrics` expose les métriques au format Prometheus, prêt à scraper plus tard.</p>
             </div>
             <div class="card mint">
               <h3>Résumé JSON</h3>
-              <p>`/api/monitoring/summary` donne une vue rapide pour debug et démonstration.</p>
+              <p>`/api/monitoring/summary` donne une vue lisible pour debug, démonstration et soutenance.</p>
             </div>
             <div class="card">
               <h3>Gate CI</h3>
               <p>`scripts.check_monitoring` vérifie que les métriques restent disponibles.</p>
             </div>
           </div>
+          <table class="table" style="margin-top: 24px">
+            <thead>
+              <tr><th>Métrique</th><th>Ce qu'elle surveille</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>`santebien_requests_total`</td><td>Nombre de requêtes observées</td></tr>
+              <tr><td>`santebien_request_latency_average_ms`</td><td>Latence moyenne de l'application</td></tr>
+              <tr><td>`santebien_co2_total_kg`</td><td>CO₂ applicatif estimé cumulé</td></tr>
+              <tr><td>`santebien_model_size_bytes`</td><td>Taille FP32 et INT8 du modèle</td></tr>
+              <tr><td>`santebien_model_size_reduction_percent`</td><td>Gain de taille grâce à INT8</td></tr>
+            </tbody>
+          </table>
           <div class="note">
             Monitoring frugal : peu de métriques, faible cardinalité, aucun dashboard lourd obligatoire.
           </div>
