@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SanteBien - Présentation finale optimisation</title>
+    <style>
+      :root {
+        --bg: #eef2e8;
+        --paper: #fffdf6;
+        --ink: #15221d;
+        --muted: #607168;
+        --green: #16745b;
+        --green-deep: #0d3d31;
+        --mint: #d9f1e5;
+        --sand: #f5e8c9;
+        --orange: #e5794f;
+        --blue: #315d7e;
+        --line: rgba(21, 34, 29, 0.12);
+        --shadow: 0 28px 70px rgba(23, 43, 35, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background:
+          radial-gradient(circle at 12% 0%, rgba(22, 116, 91, 0.16), transparent 30%),
+          radial-gradient(circle at 92% 8%, rgba(229, 121, 79, 0.16), transparent 28%),
+          linear-gradient(135deg, #edf2e8 0%, #f7efe0 100%);
+        color: var(--ink);
+        font-family: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      }
+
+      body {
+        padding: 28px;
+      }
+
+      .deck {
+        max-width: 1260px;
+        margin: 0 auto;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        color: var(--green-deep);
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 13px;
+      }
+
+      .stage {
+        position: relative;
+        overflow: hidden;
+        border-radius: 34px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        background: rgba(255, 253, 246, 0.7);
+      }
+
+      .slide {
+        display: none;
+        min-height: 730px;
+        padding: 46px 52px 42px;
+        background:
+          linear-gradient(180deg, rgba(255, 253, 246, 0.98), rgba(250, 246, 235, 0.98)),
+          var(--paper);
+      }
+
+      .slide.active {
+        display: block;
+        animation: rise 380ms ease;
+      }
+
+      @keyframes rise {
+        from {
+          transform: translateY(12px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .slide-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 24px;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 8px 14px;
+        background: var(--mint);
+        color: var(--green-deep);
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 900px;
+        font-size: 56px;
+        line-height: 1.02;
+        letter-spacing: -0.055em;
+      }
+
+      h2 {
+        font-size: 36px;
+        line-height: 1.1;
+        letter-spacing: -0.035em;
+      }
+
+      h3 {
+        font-size: 24px;
+        line-height: 1.15;
+      }
+
+      .subtitle {
+        margin-top: 18px;
+        max-width: 900px;
+        font-size: 23px;
+        line-height: 1.38;
+        color: #31413b;
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        display: grid;
+        gap: 18px;
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 24px;
+        margin-top: 42px;
+      }
+
+      .card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        padding: 24px;
+        box-shadow: 0 12px 34px rgba(20, 44, 35, 0.06);
+      }
+
+      .card.mint {
+        background: var(--mint);
+      }
+
+      .card.sand {
+        background: var(--sand);
+      }
+
+      .card.deep {
+        background: linear-gradient(145deg, #0f4638, #16382f);
+        color: #f6fff8;
+      }
+
+      .card.orange {
+        background: #ffe2d5;
+      }
+
+      .card p,
+      .card li {
+        color: #3a4c44;
+        font-size: 20px;
+        line-height: 1.38;
+      }
+
+      .card.deep p,
+      .card.deep li {
+        color: #dff8ec;
+      }
+
+      ul {
+        margin: 16px 0 0;
+        padding-left: 22px;
+      }
+
+      li {
+        margin: 9px 0;
+      }
+
+      .metric {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .metric strong {
+        font-size: 43px;
+        letter-spacing: -0.04em;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.25;
+      }
+
+      .deep .metric span {
+        color: #d5efe4;
+      }
+
+      .gain {
+        color: var(--green);
+      }
+
+      .loss {
+        color: var(--orange);
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 20px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+      }
+
+      .table th,
+      .table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        font-size: 18px;
+      }
+
+      .table th {
+        color: var(--green-deep);
+        background: #e8f4ed;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .table tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 30px;
+      }
+
+      .step {
+        position: relative;
+        min-height: 142px;
+      }
+
+      .step .number {
+        display: inline-grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 14px;
+        background: var(--green-deep);
+        color: #fff;
+        font-weight: 900;
+        margin-bottom: 14px;
+      }
+
+      .step h3 {
+        margin-bottom: 9px;
+      }
+
+      .step p {
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.3;
+      }
+
+      .code {
+        padding: 20px;
+        border-radius: 22px;
+        background: #101f1a;
+        color: #d8f7e5;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 17px;
+        line-height: 1.45;
+        overflow: auto;
+      }
+
+      .note {
+        margin-top: 24px;
+        padding: 18px 20px;
+        border-left: 5px solid var(--green);
+        border-radius: 18px;
+        background: #edf7f1;
+        color: #21362e;
+        font-size: 20px;
+        line-height: 1.4;
+      }
+
+      .big-number {
+        display: grid;
+        place-items: center;
+        min-height: 350px;
+        border-radius: 34px;
+        background:
+          radial-gradient(circle at top, rgba(255, 255, 255, 0.25), transparent 30%),
+          linear-gradient(145deg, #0e6c55, #0f3e32);
+        color: #fff;
+        text-align: center;
+      }
+
+      .big-number strong {
+        display: block;
+        font-size: 92px;
+        letter-spacing: -0.07em;
+        line-height: 0.96;
+      }
+
+      .big-number span {
+        display: block;
+        margin-top: 18px;
+        font-size: 26px;
+        color: #dff8ec;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 22px;
+        background: rgba(13, 61, 49, 0.95);
+        color: #eafff4;
+        font-weight: 700;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 16px;
+        background: #fff;
+        color: var(--green-deep);
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .progress {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 53px;
+        height: 5px;
+        background: rgba(13, 61, 49, 0.16);
+      }
+
+      .bar {
+        width: 0;
+        height: 100%;
+        background: var(--orange);
+        transition: width 240ms ease;
+      }
+
+      .speaker {
+        margin-top: 20px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.35;
+      }
+
+      .tag {
+        display: inline-flex;
+        border-radius: 999px;
+        padding: 8px 12px;
+        margin: 4px;
+        background: #edf7f1;
+        color: var(--green-deep);
+        font-weight: 800;
+      }
+
+      @media (max-width: 900px) {
+        body {
+          padding: 14px;
+        }
+
+        .slide {
+          min-height: auto;
+          padding: 30px 24px;
+        }
+
+        h1 {
+          font-size: 38px;
+        }
+
+        .hero,
+        .grid-2,
+        .grid-3,
+        .grid-4,
+        .flow {
+          grid-template-columns: 1fr;
+        }
+
+        .footer {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+
+      @media print {
+        body {
+          padding: 0;
+          background: #fff;
+        }
+
+        .topbar,
+        .footer,
+        .progress {
+          display: none;
+        }
+
+        .stage {
+          box-shadow: none;
+          border-radius: 0;
+        }
+
+        .slide {
+          display: block !important;
+          page-break-after: always;
+          min-height: 100vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="deck">
+      <div class="topbar">
+        <span>SanteBien - Projet Fil Rouge</span>
+        <span>Navigation : flèches clavier</span>
+      </div>
+
+      <section class="stage">
+        <article class="slide active">
+          <div class="slide-header">
+            <span class="eyebrow">Présentation finale</span>
+            <span class="eyebrow">Edgar & Jihed</span>
+          </div>
+          <h1>Optimiser une application santé communautaire</h1>
+          <p class="subtitle">
+            SanteBien : une application web type Stack Overflow pour poser des questions de santé,
+            répondre, vérifier les profils médecins et publier des articles.
+          </p>
+          <div class="hero">
+            <div class="card deep">
+              <h2>Objectif du cours</h2>
+              <p>
+                Mesurer avant d'optimiser, identifier les pertes, appliquer un quick win, puis
+                prouver le gain avec des métriques.
+              </p>
+            </div>
+            <div class="card mint">
+              <h2>Résultat clé</h2>
+              <div class="metric">
+                <strong class="gain">-92,30 %</strong>
+                <span>de latence moyenne grâce au cache de lecture</span>
+              </div>
+            </div>
+          </div>
+          <p class="speaker">
+            À dire : notre projet n'est pas seulement développé, il est mesuré et optimisé selon une démarche d'éco-conception.
+          </p>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Contexte</span>
+            <span class="eyebrow">MVP full-stack</span>
+          </div>
+          <h1>Le projet : SanteBien</h1>
+          <div class="grid-3" style="margin-top: 34px">
+            <div class="card">
+              <h3>Communauté</h3>
+              <p>Les utilisateurs posent des questions de santé, répondent et partagent des expériences.</p>
+            </div>
+            <div class="card">
+              <h3>Médecins vérifiés</h3>
+              <p>Un médecin envoie des justificatifs et un admin valide son profil avant publication d'articles.</p>
+            </div>
+            <div class="card">
+              <h3>Stack technique</h3>
+              <p>FastAPI, PostgreSQL, cache Redis/mémoire, Docker, Fly.io, Render PostgreSQL.</p>
+            </div>
+          </div>
+          <div class="note">
+            Périmètre validé : inscription, connexion, questions, réponses, articles, rôles et approbation médecin.
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Démarche</span>
+            <span class="eyebrow">Mesurer puis optimiser</span>
+          </div>
+          <h1>Les étapes suivies</h1>
+          <div class="flow">
+            <div class="card step">
+              <span class="number">1</span>
+              <h3>Développer</h3>
+              <p>Créer le MVP fonctionnel avec backend, front et base.</p>
+            </div>
+            <div class="card step">
+              <span class="number">2</span>
+              <h3>Mesurer</h3>
+              <p>Collecter latence, CO₂, cache et tests.</p>
+            </div>
+            <div class="card step">
+              <span class="number">3</span>
+              <h3>Profiler</h3>
+              <p>Utiliser cProfile pour repérer les zones coûteuses.</p>
+            </div>
+            <div class="card step">
+              <span class="number">4</span>
+              <h3>Optimiser</h3>
+              <p>Appliquer le cache sur les lectures fréquentes.</p>
+            </div>
+            <div class="card step">
+              <span class="number">5</span>
+              <h3>Valider</h3>
+              <p>Comparer avant/après et calculer les gains.</p>
+            </div>
+          </div>
+          <p class="speaker">
+            À dire : cette structure répond directement au cours : profiling, optimisation, validation chiffrée.
+          </p>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Problème</span>
+            <span class="eyebrow">Perte initiale</span>
+          </div>
+          <h1>Où se trouve le coût à réduire ?</h1>
+          <div class="grid-2" style="margin-top: 34px">
+            <div class="card orange">
+              <h2>Lecture froide</h2>
+              <ul>
+                <li>La question est relue depuis la base.</li>
+                <li>Le backend reconstruit la réponse.</li>
+                <li>La latence et le CPU augmentent.</li>
+                <li>Le CO₂ estimé augmente aussi.</li>
+              </ul>
+            </div>
+            <div class="card mint">
+              <h2>Lecture chaude</h2>
+              <ul>
+                <li>La réponse est déjà en cache.</li>
+                <li>La base est moins sollicitée.</li>
+                <li>La réponse est plus rapide.</li>
+                <li>Le coût par lecture baisse fortement.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="note">
+            Hypothèse d'optimisation : les questions et articles populaires seront lus plusieurs fois.
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Optimisations</span>
+            <span class="eyebrow">Quick Win</span>
+          </div>
+          <h1>Ce que nous avons optimisé</h1>
+          <table class="table" style="margin-top: 30px">
+            <thead>
+              <tr>
+                <th>Optimisation</th>
+                <th>Objectif</th>
+                <th>Impact attendu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Cache questions</td>
+                <td>Éviter les lectures base répétées</td>
+                <td>Latence plus faible</td>
+              </tr>
+              <tr>
+                <td>Cache articles</td>
+                <td>Accélérer les contenus souvent lus</td>
+                <td>Moins d'I/O</td>
+              </tr>
+              <tr>
+                <td>Invalidation ciblée</td>
+                <td>Supprimer le cache après modification</td>
+                <td>Données cohérentes</td>
+              </tr>
+              <tr>
+                <td>Validation Pydantic</td>
+                <td>Rejeter tôt les entrées invalides</td>
+                <td>Moins de traitement inutile</td>
+              </tr>
+              <tr>
+                <td>Limite de résultats</td>
+                <td>Limiter le volume chargé</td>
+                <td>Moins de mémoire</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Avant / Après</span>
+            <span class="eyebrow">Résultat mesuré</span>
+          </div>
+          <h1>Le gain principal</h1>
+          <div class="big-number" style="margin-top: 32px">
+            <div>
+              <strong>-92,30 %</strong>
+              <span>de latence moyenne sur les lectures répétées</span>
+            </div>
+          </div>
+          <div class="grid-3" style="margin-top: 18px">
+            <div class="card">
+              <div class="metric">
+                <strong>2,7821 ms</strong>
+                <span>lecture froide sans bénéfice cache</span>
+              </div>
+            </div>
+            <div class="card mint">
+              <div class="metric">
+                <strong>0,2143 ms</strong>
+                <span>lecture chaude avec cache optimisé</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="metric">
+                <strong>÷13</strong>
+                <span>coût moyen approximativement divisé par 13</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Mesures</span>
+            <span class="eyebrow">Gains détaillés</span>
+          </div>
+          <h1>Comparaison chiffrée</h1>
+          <table class="table" style="margin-top: 30px">
+            <thead>
+              <tr>
+                <th>Indicateur</th>
+                <th>Sans bénéfice cache</th>
+                <th>Avec cache</th>
+                <th>Gain</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Latence moyenne</td>
+                <td>2,7821 ms</td>
+                <td>0,2143 ms</td>
+                <td class="gain">-92,30 %</td>
+              </tr>
+              <tr>
+                <td>P95</td>
+                <td>3,159 ms</td>
+                <td>0,301 ms</td>
+                <td class="gain">-90,47 %</td>
+              </tr>
+              <tr>
+                <td>Latence maximale</td>
+                <td>18,893 ms</td>
+                <td>0,431 ms</td>
+                <td class="gain">-97,72 %</td>
+              </tr>
+              <tr>
+                <td>CO₂ estimé pour 100 lectures</td>
+                <td>1,40647e-07 kg</td>
+                <td>1,08370e-08 kg</td>
+                <td class="gain">-92,29 %</td>
+              </tr>
+              <tr>
+                <td>Cache hit rate</td>
+                <td>0 %</td>
+                <td>100 %</td>
+                <td class="gain">+100 points</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Profiling</span>
+            <span class="eyebrow">cProfile</span>
+          </div>
+          <h1>Ce que montre le profiling CPU</h1>
+          <div class="grid-2" style="margin-top: 30px">
+            <div class="card">
+              <h2>Fonctions dominantes</h2>
+              <table class="table" style="margin-top: 16px">
+                <thead>
+                  <tr>
+                    <th>Zone</th>
+                    <th>cumtime</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>exercise_api</td>
+                    <td>0,768 s</td>
+                  </tr>
+                  <tr>
+                    <td>httpx.AsyncClient.get</td>
+                    <td>0,686 s</td>
+                  </tr>
+                  <tr>
+                    <td>httpx.AsyncClient.request</td>
+                    <td>0,684 s</td>
+                  </tr>
+                  <tr>
+                    <td>starlette.routing</td>
+                    <td>0,444 s</td>
+                  </tr>
+                  <tr>
+                    <td>asgi.handle_async_request</td>
+                    <td>0,253 s</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card sand">
+              <h2>Interprétation</h2>
+              <ul>
+                <li>Le coût principal vient du framework et du banc de test.</li>
+                <li>Le code métier n'est pas encore le hotspot dominant.</li>
+                <li>Il faut éviter l'optimisation prématurée.</li>
+                <li>Le cache reste le Quick Win le plus rationnel.</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Pertes</span>
+            <span class="eyebrow">Après optimisation</span>
+          </div>
+          <h1>Les pertes restantes</h1>
+          <div class="grid-4" style="margin-top: 34px">
+            <div class="card">
+              <div class="metric">
+                <strong class="loss">1,98 %</strong>
+                <span>cache miss global</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="metric">
+                <strong>0,331 ms</strong>
+                <span>P95 local restant</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="metric">
+                <strong>7,96e-08</strong>
+                <span>kg CO₂eq pour 100 lectures</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="metric">
+                <strong>0,398 mm</strong>
+                <span>équivalent voiture</span>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            À retenir : la perte locale est faible, mais il faudra mesurer en production la latence Fly.io vers Render PostgreSQL.
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Règle 80/20</span>
+            <span class="eyebrow">Décision</span>
+          </div>
+          <h1>Faut-il optimiser plus ?</h1>
+          <div class="grid-2" style="margin-top: 34px">
+            <div class="card deep">
+              <h2>Observation</h2>
+              <p>
+                Le profiling ne montre pas encore une fonction métier qui concentre 80 % du coût.
+                Les zones coûteuses sont surtout génériques : asyncio, HTTPX, Starlette et ASGI.
+              </p>
+            </div>
+            <div class="card mint">
+              <h2>Décision</h2>
+              <p>
+                Ne pas optimiser au hasard. Garder le cache comme Quick Win prioritaire et refaire
+                les mesures après déploiement réel.
+              </p>
+            </div>
+          </div>
+          <div style="margin-top: 26px">
+            <span class="tag">Mesure avant optimisation</span>
+            <span class="tag">Profiling CPU</span>
+            <span class="tag">Cache</span>
+            <span class="tag">CO₂</span>
+            <span class="tag">Pertes restantes</span>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Roadmap</span>
+            <span class="eyebrow">Prochaines optimisations</span>
+          </div>
+          <h1>Ce qu'il faut optimiser ensuite</h1>
+          <table class="table" style="margin-top: 30px">
+            <thead>
+              <tr>
+                <th>Priorité</th>
+                <th>Optimisation</th>
+                <th>Impact attendu</th>
+                <th>Effort</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Redis externe en production</td>
+                <td>Cache partagé entre machines</td>
+                <td>Moyen</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Mesurer Fly.io vers Render PostgreSQL</td>
+                <td>Identifier la perte réseau réelle</td>
+                <td>Faible</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Index PostgreSQL</td>
+                <td>Recherche et tri plus rapides</td>
+                <td>Moyen</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Compression assets front</td>
+                <td>Moins de transfert réseau</td>
+                <td>Faible</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Conclusion</span>
+            <span class="eyebrow">Objectif atteint</span>
+          </div>
+          <h1>Ce que nous avons appris</h1>
+          <div class="grid-3" style="margin-top: 34px">
+            <div class="card">
+              <h3>Mesurer</h3>
+              <p>On ne décide pas une optimisation à l'intuition : on mesure latence, CPU, cache et CO₂.</p>
+            </div>
+            <div class="card">
+              <h3>Optimiser</h3>
+              <p>Le cache est le meilleur Quick Win pour les lectures répétées de SanteBien.</p>
+            </div>
+            <div class="card">
+              <h3>Valider</h3>
+              <p>Le gain est prouvé : -92,30 % de latence moyenne et -92,29 % de CO₂ estimé.</p>
+            </div>
+          </div>
+          <div class="note">
+            Phrase finale : nous avons mesuré avant d'optimiser, appliqué un quick win sobre, puis validé le gain par des métriques.
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-header">
+            <span class="eyebrow">Script 2 minutes</span>
+            <span class="eyebrow">À dire</span>
+          </div>
+          <h1>Résumé oral</h1>
+          <div class="card" style="margin-top: 28px">
+            <p style="font-size: 23px; line-height: 1.48">
+              Notre projet SanteBien est une application communautaire de santé. L'objectif du cours
+              était d'aller plus loin que le développement : il fallait mesurer, profiler, optimiser
+              et valider. Nous avons identifié que les questions et articles peuvent être lus plusieurs
+              fois. Sans cache, ces lectures sollicitent davantage la base. Nous avons donc optimisé ce
+              parcours avec un cache et une invalidation ciblée. Les résultats sont clairs : la latence
+              moyenne passe de 2,7821 ms à 0,2143 ms, soit un gain de 92,30 %. Le P95 baisse de 90,47 %
+              et le CO₂ estimé baisse de 92,29 %. Le profiling montre que les hotspots restants viennent
+              surtout du framework et du banc de test, donc notre Quick Win est cohérent. Les pertes
+              restantes sont faibles en local, mais devront être mesurées en production.
+            </p>
+          </div>
+        </article>
+
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <footer class="footer">
+          <span id="counter">Slide 1 / 13</span>
+          <div class="controls">
+            <button id="prev" type="button">Précédent</button>
+            <button id="next" type="button">Suivant</button>
+          </div>
+        </footer>
+      </section>
+    </main>
+
+    <script>
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const counter = document.querySelector("#counter");
+      const bar = document.querySelector("#bar");
+      let index = 0;
+
+      function showSlide(nextIndex) {
+        index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+        slides.forEach((slide, position) => slide.classList.toggle("active", position === index));
+        counter.textContent = `Slide ${index + 1} / ${slides.length}`;
+        bar.style.width = `${((index + 1) / slides.length) * 100}%`;
+      }
+
+      document.querySelector("#prev").addEventListener("click", () => showSlide(index - 1));
+      document.querySelector("#next").addEventListener("click", () => showSlide(index + 1));
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight" || event.key === " ") showSlide(index + 1);
+        if (event.key === "ArrowLeft") showSlide(index - 1);
+        if (event.key === "Home") showSlide(0);
+        if (event.key === "End") showSlide(slides.length - 1);
+      });
+
+      showSlide(0);
+    </script>
+  </body>
+</html>
