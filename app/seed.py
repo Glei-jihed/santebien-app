@@ -5,6 +5,31 @@ from app.models import Article, Comment, DoctorApplication, Question, User, now_
 from app.security import hash_password
 
 
+async def seed_initial_admin(
+    db: AsyncSession,
+    email: str,
+    password: str,
+    display_name: str = "Administrateur SanteBien",
+) -> None:
+    if not email or not password:
+        return
+
+    existing = await db.scalar(select(User).where(User.email == email))
+    if existing:
+        return
+
+    db.add(
+        User(
+            email=email,
+            display_name=display_name or "Administrateur SanteBien",
+            password_hash=hash_password(password),
+            role="admin",
+            bio="Compte administrateur initial créé au démarrage.",
+        )
+    )
+    await db.commit()
+
+
 async def seed_data(db: AsyncSession) -> None:
     if await db.scalar(select(func.count(User.id))):
         return

@@ -20,6 +20,9 @@ class Settings:
     redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     session_days = int(os.getenv("SESSION_DAYS", "14"))
     seed_demo_data = os.getenv("SEED_DEMO_DATA", "true").lower() == "true"
+    admin_email = os.getenv("ADMIN_EMAIL", "").strip().lower()
+    admin_password = os.getenv("ADMIN_PASSWORD", "")
+    admin_display_name = os.getenv("ADMIN_DISPLAY_NAME", "Administrateur SanteBien").strip()
 
 
 settings = Settings()

@@ -37,7 +37,9 @@ fly auth login
 fly launch --no-deploy
 fly postgres create
 fly postgres attach <nom-du-cluster-postgres>
-fly secrets set SEED_DEMO_DATA=true
+fly secrets set ADMIN_EMAIL="admin@example.com"
+fly secrets set ADMIN_PASSWORD="mot-de-passe-long-et-secret"
+fly secrets set ADMIN_DISPLAY_NAME="Administrateur SanteBien"
 fly deploy
 ```
 
@@ -49,6 +51,10 @@ Pour Redis en production, configurer un service Redis compatible et ajouter :
 ```bash
 fly secrets set REDIS_URL="redis://..."
 ```
+
+En production, `SEED_DEMO_DATA=false` evite de publier les comptes de demo.
+Le premier administrateur est cree automatiquement avec `ADMIN_EMAIL` et
+`ADMIN_PASSWORD` si ces secrets sont presents.
 
 Sans `REDIS_URL`, l'application fonctionne avec un cache memoire de secours.
 

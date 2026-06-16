@@ -12,7 +12,7 @@ from app.config import settings
 from app.database import SessionLocal, engine
 from app.models import Article, Base, Question, User
 from app.routers import admin, articles, auth, doctors, questions
-from app.seed import seed_data
+from app.seed import seed_data, seed_initial_admin
 
 ESTIMATED_SERVER_WATTS = 35
 FRANCE_KG_CO2_PER_KWH = 0.052
@@ -30,6 +30,14 @@ async def lifespan(_: FastAPI):
     if settings.seed_demo_data:
         async with SessionLocal() as db:
             await seed_data(db)
+    if settings.admin_email and settings.admin_password:
+        async with SessionLocal() as db:
+            await seed_initial_admin(
+                db,
+                settings.admin_email,
+                settings.admin_password,
+                settings.admin_display_name,
+            )
     yield
     await engine.dispose()
 
